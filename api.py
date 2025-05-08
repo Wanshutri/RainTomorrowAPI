@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import pandas as pd
 import pickle
+from fastapi.middleware.cors import CORSMiddleware
 
 # Cargar modelos y scalers previamente entrenados
 best_logreg_tropical = pickle.load(open("models/best_logreg_tropical.pkl", "rb"))
@@ -59,6 +60,21 @@ class InputData(BaseModel):
     Temp3pm: float
 
 app = FastAPI()
+
+# Orígenes permitidos
+origins = [
+    "http://localhost:3000",   # Para desarrollo local con Next.js
+    "https://rain-tomorrow-front.vercel.app",     # Cambia esto por tu dominio real
+]
+
+# Agregar middleware de CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,         # o usa ["*"] para permitir todos
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.post("/predict")
 def predict(data: InputData):
